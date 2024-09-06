@@ -286,6 +286,14 @@ LEFT JOIN return_status AS r ON r.issued_id = ist.issued_id
 WHERE r.return_date IS NULL AND (CURRENT_DATE - ist.issued_date) > 30
 ORDER BY m.member_id;
 ```
+**List employees with their branch manager's name**
+```sql
+SELECT e1.emp_id, e1.emp_name, e1.position, e1.salary, b.*, e2.emp_name AS manager
+FROM employees AS e1
+JOIN branch AS b ON e1.branch_id = b.branch_id
+JOIN employees AS e2 ON e2.emp_id = b.manager_id
+WHERE e1.emp_id != b.manager_id;
+```
 **Branch Performance Report**
 ```sql
 SELECT br.branch_id, br.manager_id, COUNT(issued_id) AS books_issued, SUM(b.rental_price) AS total_revenue
@@ -309,7 +317,7 @@ HAVING MAX(issued_date) + INTERVAL '5months' <= CURRENT_DATE;
 ```sql
 SELECT *
 FROM members
-WHERE member_id NOT IN (SELECT issued_member_id FROM issued_status)
+WHERE member_id NOT IN (SELECT issued_member_id FROM issued_status);
 ```
 **Find Employees with Most books issued**
 ```sql
@@ -319,6 +327,14 @@ GROUP BY ist.issued_emp_id
 HAVING COUNT(*) >=3
 ORDER BY books_issued DESC;
 ```
+**Employees with the highest salary in each branch**
+```sql
+SELECT emp_name, salary, branch_id
+FROM employees
+WHERE (branch_id, salary) IN 
+(SELECT branch_id, MAX(salary) FROM employees GROUP BY branch_id);
+```
+
 ### Advance sql Queries
 **Update Book Status on Return**
 This query automatically creates new return_id with current date as return_date with user provided inputs(issued_id, book_quality) will update book status in books table to yes when a book is returned.
